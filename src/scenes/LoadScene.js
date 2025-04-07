@@ -1,4 +1,5 @@
 import { CST } from "../CST.js";
+import { ITL } from "./ITL.js"; // All Images To Load.
 
 export class LoadScene extends Phaser.Scene {
     constructor() {
@@ -7,17 +8,15 @@ export class LoadScene extends Phaser.Scene {
 
     user_id
 
-    preload() {
-        this.level = 1
-        this.mapLevel = 1 
-
-        //const camH = this.cameras.main.height
-        //const camW = this.cameras.main.width  
+    preload() { 
         
-        this.Game() ;
-        this.Congrats();
-        this.HowTo();
-        this.Audio();
+        // Load all image assets for HOME SCENE
+        Object.values(ITL).forEach(group => {
+            group.forEach(asset => { 
+                console.log(asset.url)
+                this.load.image(asset.key, asset.url);
+            });
+        });
 
         this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'bg-preload').setOrigin(.5)
         this.loadingbar2 = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'loading-bar').setOrigin(0, 0).setScale(.5).setVisible(false)
@@ -36,31 +35,9 @@ export class LoadScene extends Phaser.Scene {
 
     create() 
     {   
-        this.scene.start(CST.SCENES.GAME)  
+        this.scene.start(CST.SCENES.ROOMGAME)  
     }   
-
-    Game()
-    {  
-        this.load.image('wheel', './assets/img/scene/game/wheel.png'); 
-        this.load.image('wheelBg', './assets/img/scene/game/wheel-bg.png'); 
-        this.load.image('wheelPointer', './assets/img/scene/game/wheel-pointer.png'); 
-        this.load.image('infoButton', './assets/img/ui/info-btn.png');
-        this.load.image('spinButton', './assets/img/ui/spin-btn.png');
-        //this.load.image('pageText', './assets/img/scene/game/page-text.png');
-        //this.load.image('emailField', './assets/img/scene/game/email-field.png');
-    }  
-
-    Congrats()
-    {
-        this.load.image('congratsBg', './assets/img/scene/result/result.png'); 
-        this.load.image('resultBg', './assets/img/scene/result/result2.png'); 
-    }
-
-    HowTo()
-    {
-        this.load.image('howtoBg', './assets/img/scene/howto/howto-bg.png'); 
-        this.load.image('closeButton', './assets/img/scene/howto/close.png'); 
-    }
+ 
 
     Audio(){
         this.load.audio('bg', './assets/audio/bg.mp3');

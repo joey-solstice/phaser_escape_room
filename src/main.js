@@ -19,7 +19,10 @@ import { Share } from "./scenes/Share.js"
 import { Comingsoon } from "./scenes/Comingsoon.js"
 */
 import { PreLoadScene } from "./scenes/PreLoadScene.js"
+import { HomeScene } from "./scenes/HomeScene.js"
+import { BackStoryScene } from "./scenes/BackStory.js"
 import { GameScene } from "./scenes/GameScene.js"
+import { RoomGameScene } from "./scenes/RoomGameScene.js"
 import { LoadScene } from "./scenes/LoadScene.js"
 import { HowToScene } from "./scenes/HowToScene.js" 
 import { CongratsScene } from "./scenes/CongratsScene.js" 
@@ -45,9 +48,12 @@ var config = {
         },
     },
     scene: [  
-        PreLoadScene,  
-        LoadScene,  
+        PreLoadScene,
+        LoadScene,   
+        HomeScene,
+        BackStoryScene,
         GameScene,  
+        RoomGameScene,
         HowToScene,
         CongratsScene,
         ErrorScene,

@@ -6,10 +6,8 @@ export class PreLoadScene extends Phaser.Scene {
     }
 
     preload() {
-        // Loading screen
-        this.load.image('general-bg', './assets/img/general/bg.png');
-        this.load.image('bg-preload', './assets/img/scene/preload/blur.png');
-        this.load.image('bg-load', './assets/img/ui/bg-load.png')
+        // Loading screen 
+        this.load.image('bg-preload', './assets/img/scene/preload/blur.png'); 
         this.load.image('bg-loading', './assets/img/scene/preload/bg-loading.png')
         this.load.image('loading-bar', './assets/img/scene/preload/loading-bar.png')
     }
