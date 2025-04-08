@@ -34,5 +34,7 @@ export const ITL = {
     GENERAL :[
         {key: 'close-btn-round', url:  './assets/img/general/close.png', name: 'Round Close Button'}, 
         {key: 'start-btn-general', url:  './assets/img/general/start.png', name: 'Start Button'}, 
+        {key: 'information-bg-general', url:  './assets/img/general/information.png', name: 'Information Background'}, 
+        {key: 'continue-btn-round', url:  './assets/img/general/continue.png', name: 'Continue Button'}, 
     ]
 }

@@ -1,4 +1,5 @@
 import { CST } from "../CST.js" 
+import { GameData } from "./GameData.js" 
 import { ImgButton } from "../prefabs/ImgButton.js"  
 import { AnimationManager } from './AnimationManager.js'; 
 import { AudioManager } from './AudioManager.js'; 
@@ -14,23 +15,19 @@ export class GameScene extends Phaser.Scene {
 
     init(data) {
         this.data = data;    
-        this.data.room = 1;
+        this.data.room = 1; 
     }
 
    create() { 
-    
-
 
        this.helper = new Helper(this);
        this.animationManager = new AnimationManager(this); 
        this.displayAssets();  
-       setTimeout(() => { 
-            this.displayInfo();
-        }, 100); 
-        
-            
+     
         this.animateBackgroundColor()
    } 
+
+
 
    animateBackgroundColor()
    {
@@ -60,8 +57,7 @@ export class GameScene extends Phaser.Scene {
    displayAssets() { 
        const roomNumber = 'bg-room-' +  this.data.room;
      
-       
-       console.log(roomNumber)
+        
        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, roomNumber).setOrigin(.5); 
        this.pageBg.setInteractive() 
  
@@ -81,6 +77,7 @@ export class GameScene extends Phaser.Scene {
        this.challengeFour = new ImgButton(this, 740, 920, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 4));
        this.add.existing(this.challengeFour)  
    }
+ 
 
    displayInfo()
    { 
@@ -89,7 +86,33 @@ export class GameScene extends Phaser.Scene {
    }
 
    openChallengeGame(room=1, challenge=1){
-        this.scene.run(CST.SCENES.ROOMGAME);
-        this.scene.bringToTop(CST.SCENES.ROOMGAME); 
+       
+        const isChallegeCompleted = GameData.ROOMS[room-1].challenges[challenge-1].completed;
+        const sceneGameToLoad = GameData.ROOMS[room-1].challenges[challenge-1].scene;
+        const lives = 1;
+  
+        const data = {lives: lives, room: room, challenge: challenge}
+
+        if(!isChallegeCompleted && lives >=1){
+           this.showScene(sceneGameToLoad, data) 
+        }else{
+
+            const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
+            const total = GameData.ROOMS[this.data.room - 1].numberOfChallenges;
+
+
+            const message = {
+                success: true,
+                message:{title: GameData.GENERAL.challengeCompletedText, body:  GameData.ROOMS[room - 1].challenges[challenge -1].successBody(completed,total)}
+            } 
+            this.showScene(CST.SCENES.INFORMATION, message) 
+        }
+        
+   }
+
+   showScene(scene, data)
+   {
+        this.scene.run(scene, data);
+        this.scene.bringToTop(scene); 
    }
 }

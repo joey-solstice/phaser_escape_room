@@ -10,10 +10,11 @@ export class LoadScene extends Phaser.Scene {
 
     preload() { 
         
+        this.Audio();
         // Load all image assets for HOME SCENE
         Object.values(ITL).forEach(group => {
             group.forEach(asset => { 
-                console.log(asset.url)
+              //  console.log(asset.url)
                 this.load.image(asset.key, asset.url);
             });
         });
@@ -35,15 +36,18 @@ export class LoadScene extends Phaser.Scene {
 
     create() 
     {   
-        this.scene.start(CST.SCENES.ROOMGAME)  
+        this.scene.start(CST.SCENES.HOME)  // {room: 1, challenge: 2}
     }   
  
 
     Audio(){
-        this.load.audio('bg', './assets/audio/bg.mp3');
+        //this.load.audio('bg', './assets/audio/bg.mp3');
         this.load.audio('click', './assets/audio/click.mp3');
         this.load.audio('congrats', './assets/audio/levelup.mp3');
         this.load.audio('popup', './assets/audio/popup.mp3');
         this.load.audio('error', './assets/audio/error.mp3');
+        this.load.audio('distorted-audio-1', './assets/audio/room1/challenge2/audio1.mp3');
     }
+
+
 }

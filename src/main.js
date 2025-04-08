@@ -17,18 +17,29 @@ import { Leaderboard } from "./scenes/Leaderboard.js"
 import { Backstory } from "./scenes/Backstory.js"
 import { Share } from "./scenes/Share.js"
 import { Comingsoon } from "./scenes/Comingsoon.js"
+
+import * as Matter from "./matter-js.js"  
 */
+
+
 import { PreLoadScene } from "./scenes/PreLoadScene.js"
 import { HomeScene } from "./scenes/HomeScene.js"
 import { BackStoryScene } from "./scenes/BackStory.js"
 import { GameScene } from "./scenes/GameScene.js"
-import { RoomGameScene } from "./scenes/RoomGameScene.js"
+import { InformationScene } from "./scenes/InformationScene.js"
 import { LoadScene } from "./scenes/LoadScene.js"
 import { HowToScene } from "./scenes/HowToScene.js" 
 import { CongratsScene } from "./scenes/CongratsScene.js" 
 import { ErrorScene } from "./scenes/ErrorScene.js" 
 
-//import * as Matter from "./matter-js.js"  
+
+
+import { R1C1 } from "./scenes/challenges/R1C1.js"
+import { R1C2 } from "./scenes/challenges/R1C2.js"
+import { R1C3 } from "./scenes/challenges/R1C3.js"
+import { R1C4 } from "./scenes/challenges/R1C4.js"
+
+
 
 function isDesktop() {
     return !navigator.userAgent.match(/Mobi/);
@@ -53,7 +64,11 @@ var config = {
         HomeScene,
         BackStoryScene,
         GameScene,  
-        RoomGameScene,
+        R1C1,
+        R1C2,
+        R1C3,
+        R1C4,
+        InformationScene,
         HowToScene,
         CongratsScene,
         ErrorScene,

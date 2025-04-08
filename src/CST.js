@@ -1,4 +1,4 @@
-export const CST = {
+ export const CST = {
     SCENES: {
         PRELOAD: "PRELOAD",
         LOAD: "LOAD",
@@ -6,7 +6,15 @@ export const CST = {
         BACKSTORY: "BACKSTORY", 
         HOWTO: "HOWTO", 
         GAME: "GAME",
-        ROOMGAME: "ROOMGAME",
+        R1C1: "R1C1",
+        R1C2:"R1C2",
+        R1C3:"R1C3",
+        R1C4:"R1C4",
+        R2C1:"R2C1",
+        R2C2:"R2C2",
+        R2C3:"R2C3",
+        R2C4:"R2C4",
+        INFORMATION: "INFORMATION",
         ERROR: "ERROR",
         GameUI: "GameUI",
         FOUND: "FOUND",
