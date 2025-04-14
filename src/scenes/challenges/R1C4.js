@@ -12,6 +12,7 @@ export class R1C4 extends Phaser.Scene {
 
     init(data){
         this.data = data;
+        console.log(this.data)
         this.data.message = {title:"", body:""} 
        
         this.getGameData();
@@ -25,10 +26,7 @@ export class R1C4 extends Phaser.Scene {
         this.displayAssets(); 
 
          
-        this.challengeGame()
-        this.audioControl()
-
-        this.passAudio = this.sound.add('distorted-audio-1');
+        this.challengeGame()  
      
     } 
 
@@ -36,23 +34,7 @@ export class R1C4 extends Phaser.Scene {
     {
         this.movesLeft =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].moves;  
 
-    }
-      
-    audioControl()
-    {
-        const playButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 280, '▶ Play Audio', {
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#333',
-            padding: { x: 20, y: 10 }
-        })
-        .setOrigin(0.5)
-        .setInteractive();
-        
-        playButton.on('pointerdown', () => {
-            this.passAudio.play();
-        });
-    }
+    } 
  
     updateMoveLabel()
     {
@@ -60,124 +42,95 @@ export class R1C4 extends Phaser.Scene {
     }
     
     challengeGame() { 
-        const gridRows = 3;
-        const gridCols = 3;
-        const tileSize = 150;
-        const offsetX = this.cameras.main.centerX -150; // Starting x position
-        const offsetY = this.cameras.main.centerY; // Starting y position
-        const padding = 10;
-    
-        let number = 1;
-        const tiles = [];
-        
-        //Seven... One... Three... Five... Two... Eight...
+        this.riddle = "What has keys but can't open locks?";
+        this.answer = "PIANO"; // Correct answer (uppercase) 
+        this.clickedLetters = [];
 
-       this.correct = [7,1,3,5,2,8]
-      // this.correct = [1,2,3,4,5,6]
-       this.dialed = [];
-    
-        for (let row = 0; row < gridRows; row++) {
-            for (let col = 0; col < gridCols; col++) {
-                const x = offsetX + col * (tileSize + padding);
-                const y = offsetY + row * (tileSize + padding);
-    
-                // Create a background rectangle
-                const rect = this.add.rectangle(0, 0, tileSize, tileSize, 0x444444);
-                rect.setStrokeStyle(2, 0xffffff);
-    
-                // Create the text
-                const text = this.add.text(0, 0, number.toString(), {
-                    fontSize: '46px',
-                    fontFamily: 'monospace',
-                    color: '#ffffff',
-                }).setOrigin(0.5);
-    
-                // Put them together in a container
-                const tile = this.add.container(x, y, [rect, text])
-                    .setSize(tileSize, tileSize)
-                    .setInteractive(new Phaser.Geom.Rectangle(0, 0, tileSize, tileSize), Phaser.Geom.Rectangle.Contains);
-    
-                tile.number = number;
-                tile.gridIndex = tiles.length;
-    
-                tile.on('pointerdown', () => { 
-                    rect.setFillStyle( 0x555555);   
-                });
+        this.maxMistakes = 6;
+        this.mistakes = 0;
+ 
+        this.riddleText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 300, this.riddle, {
+            fontSize: '50px',
+            color: '#ffffaa',
+            wordWrap: { width: 600, useAdvancedWrap: true },
+            align: 'center'
+        }).setOrigin(0.5);
 
-                tile.on('pointerup', () => { 
-                    this.dialed.push(tile.number)
-                    rect.setFillStyle( 0x444444);  
-                   
-                    // 👁️ Build visible + masked code
-                    let visible = this.dialed.join('');            // e.g. "123"
-                    let masked = visible.padEnd(6, '*');            // e.g. "123***"
+        this.answerText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, '', {
+            fontSize: '52px',
+            color: '#00ffcc',
+            letterSpacing: 4
+        }).setOrigin(0.5);
 
-                    // Set to label
-                    this.codeLabel.setText(masked);
+        this.statusText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, '', {
+            fontSize: '54px',
+            color: '#00ff00',
+            wordWrap: { width: 900, useAdvancedWrap: true },
+        }).setOrigin(0.5);
+ 
+        this.createLetterButtons();
+    } 
+     
+    updateAnswerDisplay() {
+        const display = this.answer
+            .split('')
+            .map(letter => (this.clickedLetters.includes(letter) ? letter : '_'))
+            .join(' ');
 
-                    if(this.dialed.length >=6){
-                        this.checkPattern(); 
-                    }
+        this.answerText.setText(display);
+    }
+
+    createLetterButtons() {
+        const uniqueAnswerLetters = [...new Set(this.answer.split(''))];
+        const extraLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            .split('')
+            .filter(l => !uniqueAnswerLetters.includes(l));
+
+        Phaser.Utils.Array.Shuffle(extraLetters);
+        const chosenExtras = extraLetters.slice(0, 12 - uniqueAnswerLetters.length);
+
+        const combinedLetters = Phaser.Utils.Array.Shuffle([...uniqueAnswerLetters, ...chosenExtras]);
+
+
+        const startX = this.cameras.main.centerX - 300;
+        const startY =  this.cameras.main.centerY + 100;
+        const spacing = 110;
+
+        combinedLetters.forEach((letter, i) => {
+            const x = startX + (i % 6) * spacing;
+            const y = startY + Math.floor(i / 6) * (spacing + 50);
+
+            const btn = this.add.text(x, y, letter, {
+                fontSize: '60px',
+                backgroundColor: '#444444',
+                color: '#ffffff',
+                padding: { x: 30, y: 30 },
+                fixedWidth: 100,
+                align: 'center'
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            btn.on('pointerdown', () => this.handleLetterClick(letter, btn));
+        });
+    }
+
+    handleLetterClick(letter, btn) {
+        btn.disableInteractive();
+        this.clickedLetters.push(letter);
+
+        const display = this.clickedLetters.join('');
+        this.answerText.setText(display);
+
+        if (this.clickedLetters.length === this.answer.length) {
+            if (display === this.answer) {
+                this.statusText.setText('✅ You solved the riddle!');
+                this.setCompletedChallenge();
+                GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
+
+            } else { 
+                this.answerText.setText('');
                 
-                });
-    
-                tiles.push(tile);
-                number++;
             }
         }
-    } 
-    updateCorrectOutlines() {
-        for (let i = 0; i < this.tiles.length; i++) {
-            const tile = this.tiles[i];
-            const expectedKey = this.correctOrder[i];
-    
-            if (tile.symbolKey === expectedKey) {
-                tile.correctOutline.setVisible(true);
-            } else {
-                tile.correctOutline.setVisible(false);
-            }
-        }
-    } 
-
-    checkArrayIfSame(arr1, arr2)
-    {
-        if (arr1.length !== arr2.length) return false;
-
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] !== arr2[i]) return false;
-        }
-        return true;
-    }
-    checkOutOfMoves()
-    {
-        const outOfMoves = this.movesLeft > 0 ? false:true;
-        if(outOfMoves){  
-            this.closePage(); 
-            this.setInfoMessage(false); 
-            this.showInfoMessage(false);
-        }
-    }
-    checkPattern() { 
-
-        const isCorrect = this.checkArrayIfSame(this.correct, this.dialed)
-      
-       
-        if (isCorrect) {  
-            GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
-            this.setCompletedChallenge();
-
-            this.closePage(); 
-            this.setInfoMessage(true); 
-            this.showInfoMessage(true);
-        }else{ 
-            this.dialed = [];
-            this.codeLabel.setText('******');
-            this.movesLeft--;
-            this.updateMoveLabel();
-            this.checkOutOfMoves();
-        }
-        
-
     }
  
     setCompletedChallenge()
@@ -221,8 +174,7 @@ export class R1C4 extends Phaser.Scene {
         this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
 
 
-        this.codeLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 140, "*******", this.styleCode).setOrigin(0.5).setDepth(999)
-
+       
         this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
         this.add.existing(this.closeBtn)  
 

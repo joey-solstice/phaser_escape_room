@@ -6,7 +6,7 @@ export const GameData = {
         {
             name: "Room 1: The Fractured Gateway", 
             description: "You find yourself in a digital rift where reality is glitching. You must stabilize the portal before they get permanently trapped in a fragmented dimension.",
-            lives: 1,
+            lives: 3, // Lives per room.
             numberOfChallenges: 4,
             numberOfChallengesCompleted: 0,
             challenges: [
@@ -46,7 +46,7 @@ export const GameData = {
                     gameoverTitle: "Color Puzzle Failed.",
                     gameoverBody: "You're out of tries",
                     movesName : "Tries",
-                    moves: 3,
+                    moves: 4,
                     completed: false,
                 },
                 {  

@@ -36,10 +36,9 @@ export class LoadScene extends Phaser.Scene {
 
     create() 
     {   
-        this.scene.start(CST.SCENES.HOME)  // {room: 1, challenge: 2}
-    }   
+        this.scene.start(CST.SCENES.R1C4, {room: 1, challenge: 4} )  // 
  
-
+    }
     Audio(){
         //this.load.audio('bg', './assets/audio/bg.mp3');
         this.load.audio('click', './assets/audio/click.mp3');

@@ -25,10 +25,8 @@ export class R1C3 extends Phaser.Scene {
         this.displayAssets(); 
 
          
-        this.challengeGame()
-        this.audioControl()
-
-        this.passAudio = this.sound.add('distorted-audio-1');
+        this.challengeGame() 
+ 
      
     } 
 
@@ -38,94 +36,139 @@ export class R1C3 extends Phaser.Scene {
 
     }
       
-    audioControl()
-    {
-        const playButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 280, '▶ Play Audio', {
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#333',
-            padding: { x: 20, y: 10 }
-        })
-        .setOrigin(0.5)
-        .setInteractive();
-        
-        playButton.on('pointerdown', () => {
-            this.passAudio.play();
-        });
-    }
+     
  
     updateMoveLabel()
     {
         this.moveLabel.setText( this.moveName + ": " + this.movesLeft );
     }
     
-    challengeGame() { 
-        const gridRows = 3;
-        const gridCols = 3;
-        const tileSize = 150;
-        const offsetX = this.cameras.main.centerX -150; // Starting x position
-        const offsetY = this.cameras.main.centerY; // Starting y position
-        const padding = 10;
-    
-        let number = 1;
-        const tiles = [];
-        
-        //Seven... One... Three... Five... Two... Eight...
+    challengeGame() {  
+        this.stopGeneratePortalColor = false;
+ 
+        this.colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00]; // red, green, blue, yellow in hex
+        this.colorNames = ['red', 'green', 'blue', 'yellow']; // for label use
+        this.targetColor = null;
+        this.currentPortalColor = null;
+        this.syncCount = 0;
+        this.totalSyncs = 4;
 
-       this.correct = [7,1,3,5,2,8]
-      // this.correct = [1,2,3,4,5,6]
-       this.dialed = [];
-    
-        for (let row = 0; row < gridRows; row++) {
-            for (let col = 0; col < gridCols; col++) {
-                const x = offsetX + col * (tileSize + padding);
-                const y = offsetY + row * (tileSize + padding);
-    
-                // Create a background rectangle
-                const rect = this.add.rectangle(0, 0, tileSize, tileSize, 0x444444);
-                rect.setStrokeStyle(2, 0xffffff);
-    
-                // Create the text
-                const text = this.add.text(0, 0, number.toString(), {
-                    fontSize: '46px',
-                    fontFamily: 'monospace',
-                    color: '#ffffff',
-                }).setOrigin(0.5);
-    
-                // Put them together in a container
-                const tile = this.add.container(x, y, [rect, text])
-                    .setSize(tileSize, tileSize)
-                    .setInteractive(new Phaser.Geom.Rectangle(0, 0, tileSize, tileSize), Phaser.Geom.Rectangle.Contains);
-    
-                tile.number = number;
-                tile.gridIndex = tiles.length;
-    
-                tile.on('pointerdown', () => { 
-                    rect.setFillStyle( 0x555555);   
-                });
+        this.colorText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 300, '', {
+            fontSize: '48px',
+            color: '#ffffff',
+        }).setOrigin(0.5);
 
-                tile.on('pointerup', () => { 
-                    this.dialed.push(tile.number)
-                    rect.setFillStyle( 0x444444);  
-                   
-                    // 👁️ Build visible + masked code
-                    let visible = this.dialed.join('');            // e.g. "123"
-                    let masked = visible.padEnd(6, '*');            // e.g. "123***"
+        this.targetText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, '', {
+            fontSize: '44px',
+            color: '#00ffcc',
+        }).setOrigin(0.5);
 
-                    // Set to label
-                    this.codeLabel.setText(masked);
+        this.statusText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, '', {
+            fontSize: '44px',
+            color: '#00ff00',
+        }).setOrigin(0.5);
 
-                    if(this.dialed.length >=6){
-                        this.checkPattern(); 
-                    }
-                
-                });
-    
-                tiles.push(tile);
-                number++;
+        //this.syncSound = this.sound.add('syncSuccess');
+
+        this.createColorButtons();
+        this.startNewTarget();
+
+        // Update the portal color every second
+        this.time.addEvent({
+            delay: 1000,
+            loop: true,
+            callback: () => {
+                this.updatePortalColor();
             }
+        });
+    }
+
+    createColorButtons() {
+        this.colorButtons = [];
+        const radius = 80;
+
+        this.colors.forEach((colorValue, i) => {
+            const x = (this.cameras.main.centerX - 290) + i * 200;
+            const y = this.cameras.main.centerY + 100;
+
+            const circle = this.add.circle(x, y, radius, colorValue)
+                .setInteractive({ useHandCursor: true });
+
+            circle.on('pointerdown', () => this.handleColorClick(this.colorNames[i]));
+            this.colorButtons.push(circle);
+        });
+    }
+
+    updatePortalColor() {
+        if (this.stopGeneratePortalColor)  return;
+        const index = Phaser.Math.Between(0, this.colorNames.length - 1);
+        this.currentPortalColor = this.colorNames[index];
+        this.colorText.setText(`Portal Color: ${this.currentPortalColor.toUpperCase()}`);
+    }
+
+    startNewTarget() {
+        let newColor;
+        do {
+            const index = Phaser.Math.Between(0, this.colorNames.length - 1);
+            newColor = this.colorNames[index];
+        } while (newColor === this.currentPortalColor);
+    
+        this.targetColor = newColor;
+        this.targetText.setText(`Synchronize: ${this.targetColor.toUpperCase()}`);
+    }
+
+    handleColorClick(clickedColor) {
+        if (clickedColor === this.targetColor && clickedColor === this.currentPortalColor) {
+            this.syncCount++;
+            this.statusText.setText(`✅ Synced ${this.syncCount}/${this.totalSyncs}`);
+         
+            if (this.syncCount >= this.totalSyncs) {
+                this.setCompletedChallenge();
+                GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
+                
+                this.closePage(); 
+                this.setInfoMessage(true); 
+                this.showInfoMessage(true); 
+
+            } else {
+                this.startNewTarget();
+            }
+        } else {
+            this.statusText.setText('❌ Incorrect timing!');
+        
+            this.movesLeft--;
+            this.updateMoveLabel();
+            this.checkOutOfMoves(); 
         }
-    } 
+    }
+
+    setCompletedChallenge()
+    {
+        GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted += 1;
+    }
+    setInfoMessage(success = false)
+    {
+        const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
+        const total = GameData.ROOMS[this.data.room - 1].numberOfChallenges;
+
+        if(success){
+            this.data.message.title = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].successTitle;
+            this.data.message.body  = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].successBody(completed,total);
+        }else{
+            this.data.message.title = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].gameoverTitle;
+            this.data.message.body  = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].gameoverBody;
+        } 
+    }
+
+    showInfoMessage(success = false)
+    {
+        const data = {success:success, message : this.data.message}
+        this.scene.run(CST.SCENES.INFORMATION, data);
+        this.scene.bringToTop(CST.SCENES.INFORMATION);
+    }
+
+    //=========
+
     updateCorrectOutlines() {
         for (let i = 0; i < this.tiles.length; i++) {
             const tile = this.tiles[i];
@@ -180,30 +223,7 @@ export class R1C3 extends Phaser.Scene {
 
     }
  
-    setCompletedChallenge()
-    {
-        GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted += 1;
-    }
-    setInfoMessage(success = false)
-    {
-        const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
-        const total = GameData.ROOMS[this.data.room - 1].numberOfChallenges;
-
-        if(success){
-            this.data.message.title = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].successTitle;
-            this.data.message.body  = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].successBody(completed,total);
-        }else{
-            this.data.message.title = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].gameoverTitle;
-            this.data.message.body  = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].gameoverBody;
-        } 
-    }
-
-    showInfoMessage(success = false)
-    {
-        const data = {success:success, message : this.data.message}
-        this.scene.run(CST.SCENES.INFORMATION, data);
-        this.scene.bringToTop(CST.SCENES.INFORMATION);
-    }
+    
 
     displayAssets() {
         this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'room-1-game-bg').setOrigin(.5); 
@@ -221,7 +241,7 @@ export class R1C3 extends Phaser.Scene {
         this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
 
 
-        this.codeLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 140, "*******", this.styleCode).setOrigin(0.5).setDepth(999)
+      
 
         this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
         this.add.existing(this.closeBtn)  
