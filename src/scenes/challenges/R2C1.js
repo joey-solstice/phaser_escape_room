@@ -4,10 +4,10 @@ import { Helper } from '../Helper.js';
 import { GameData } from "../GameData.js";
 
 
-export class R1C1 extends Phaser.Scene {
+export class R2C1 extends Phaser.Scene {
     
     constructor() {
-        super({ key: CST.SCENES.R1C1})  
+        super({ key: CST.SCENES.R2C1})  
     }   
 
     init(data){
@@ -23,15 +23,12 @@ export class R1C1 extends Phaser.Scene {
         this.helper = new Helper(this);
 
         this.movesLeft =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].moves; 
-        this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves;
+        this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves; 
+
         this.livesUpdated = false; // we update lives(retries per room) when player do a move 
  
         this.displayAssets();  
         this.challengeOne();
-
-        this.congratsAudio  = this.sound.add('congrats');
-        this.clickAudio = this.sound.add('click');
-        this.errorAudio = this.sound.add('error'); 
     } 
       
 
@@ -39,92 +36,64 @@ export class R1C1 extends Phaser.Scene {
 
     challengeOne() { 
        
-        this.gridRows = 3;
-        this.gridCols = 3;
-        this.tileSize = 180;
-        this.offsetX = this.cameras.main.centerX -200; // Starting x position
-        this.offsetY = this.cameras.main.centerY - 200 ; // Starting y position
-        this.padding = 30;
-       
-    
-        this.symbolKeys = ['r1-c1-1', 'r1-c1-2', 'r1-c1-3', 'r1-c1-4', 'r1-c1-5', 'r1-c1-6', 'r1-c1-7', 'r1-c1-8', 'r1-c1-9', ];
-    
-        this.tiles = [];
-            
-        // 2. Shuffle once to get the STARTING layout
-        const shuffledSymbols = Phaser.Utils.Array.Shuffle([...this.symbolKeys]);
-        
-        // 3. Rotate the array N steps to get the CORRECT solution
-        function rotateArray(arr, steps) {
-            const len = arr.length;
-            steps = steps % len;
-            return arr.slice(steps).concat(arr.slice(0, steps));
-        }
-        
-        // You can rotate any amount, e.g. 3 steps:
-        const correctOrder = rotateArray(shuffledSymbols, 3);
-          
-        // 4. Store them
-        this.correctOrder =   correctOrder // correctOrder;  // dev = shuffledSymbols; prod = correctOrde
+        this.directions = ['LEFT', 'RIGHT', 'UP', 'DOWN'];
+        this.invertedMap = {
+            LEFT: 'RIGHT',
+            RIGHT: 'LEFT',
+            UP: 'DOWN',
+            DOWN: 'UP'
+        };
 
-        // console.log('Start Order: ',  shuffledSymbols)
-        // console.log('Correct Order: ', this.correctOrder)
+        this.centerX = this.cameras.main.centerX;
+        this.centerY = this.cameras.main.centerY;
 
-        this.selectedTile = null;
-        this.secondTile = null;
+        // Instruction text
+        this.instructionText = this.add.text(this.centerX, 100, '', {
+            fontSize: '48px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
 
-        this.buildGrid(shuffledSymbols);
+        // Placeholder for buttons
+        this.buttons = [];
+
+        this.showInstruction();
+         
     }
 
-    
-    buildGrid(symbols) {
-        let i = 0;
-    
-        for (let row = 0; row < this.gridRows; row++) {
-            for (let col = 0; col < this.gridCols; col++) {
-                const x = this.offsetX + col * (this.tileSize + this.padding);
-                const y = this.offsetY + row * (this.tileSize + this.padding);
-    
-                const symbolKey = symbols[i];
-    
-                const tile = this.add.image(x, y, symbolKey).setInteractive();
-                tile.setDisplaySize(this.tileSize, this.tileSize);
-                tile.symbolKey = symbolKey;
-                tile.gridIndex = i;
 
-                const outline = this.add.graphics();
-                outline.lineStyle(4, 0xffff00); // yellow border, 4px
-                outline.strokeRect(
-                    tile.x - this.tileSize / 2,
-                    tile.y - this.tileSize / 2,
-                    this.tileSize,
-                    this.tileSize
-                );
-                outline.setVisible(false);
-                tile.outline = outline;
+    showInstruction() {
+        // Pick random instruction
+        this.currentInstruction = Phaser.Utils.Array.GetRandom(this.directions);
+        this.instructionText.setText(this.currentInstruction);
 
+        // Clear existing buttons
+        this.buttons.forEach(btn => btn.destroy());
+        this.buttons = [];
 
-                // ✅ Correct position outline (green)
-                const correctOutline = this.add.graphics();
-                correctOutline.lineStyle(3, 0x00ff00); // green border
-                correctOutline.strokeRect(
-                    tile.x - this.tileSize / 2,
-                    tile.y - this.tileSize / 2,
-                    this.tileSize,
-                    this.tileSize
-                );
-                correctOutline.setVisible(false);
-                tile.correctOutline = correctOutline;
-    
-                tile.on('pointerdown', () => this.handleTileClick(tile));
-    
-                this.tiles.push(tile); // store in grid order
-                
-    
-                i++;
-            }
+        // Shuffle directions
+        const shuffled = Phaser.Utils.Array.Shuffle([...this.directions]);
+
+        // Create buttons in a row (spaced evenly)
+        const startX = this.centerX - 180;
+        shuffled.forEach((dir, index) => {
+            const x = startX + index * 120;
+            const btn = this.add.image(x, this.centerY, dir.toLowerCase() + "-btn").setInteractive().setScale(1);
+            btn.on('pointerdown', () => this.checkInput(dir));
+            this.buttons.push(btn);
+        });
+    }
+
+    checkInput(selectedDirection) {
+        const correctDirection = this.invertedMap[this.currentInstruction];
+        if (selectedDirection === correctDirection) {
+            console.log(`✅ Correct! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
+            this.showInstruction(); // Next round
+        } else {
+            console.log(`❌ Wrong! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
+            this.scene.restart(); // Wrong! Reset the scene
         }
     }
+     
     
     updateCorrectOutlines() {
         for (let i = 0; i < this.tiles.length; i++) {
@@ -139,29 +108,7 @@ export class R1C1 extends Phaser.Scene {
         }
     }
 
-
-
-    handleTileClick(tile) {
-            
-        this.clickAudio.play();
-
-        if(this.movesLeft <=0){
-            // show no more move left 
-            return;
-        }
-        if (!this.selectedTile) {
-            this.selectedTile = tile; 
-            tile.outline.setVisible(true); // Highlight first tile
-        } else if (!this.secondTile && tile !== this.selectedTile) {
-            this.secondTile = tile;
-            tile.outline.setVisible(true); // Highlight second tile
-
-            this.swapTiles(this.selectedTile, this.secondTile);
-        } else {
-            this.resetSelection();
-        }
-    }
-
+ 
     updateLives(increase = false)
     {
         if(this.livesUpdated) return;
@@ -208,8 +155,9 @@ export class R1C1 extends Phaser.Scene {
         this.time.delayedCall(150, () => this.resetSelection());
 
         const currentPattern = this.tiles.map(tile => tile.symbolKey);
-         
-        this.updateMovesLeft()
+        
+        
+        this.updateMovesLeft();
         
         this.updateMoveLabel();
         this.checkPattern();
@@ -218,13 +166,14 @@ export class R1C1 extends Phaser.Scene {
     }
 
     updateMovesLeft()
-    {  
+    { 
+        console.log('Is unli',this.unlimitedMoves);
         if(this.unlimitedMoves) return; 
         this.movesLeft--;
     }
-
     checkOutOfMoves()
     { 
+        
         const outOfMoves = this.movesLeft > 0 ? false:true;
         if(outOfMoves){          
             this.updateLives(false);
@@ -235,8 +184,7 @@ export class R1C1 extends Phaser.Scene {
     }
     updateMoveLabel()
     {
-        if(this.unlimitedMoves) return;  
-        this.moveLabel.setText( "Moves: " + this.movesLeft ); 
+        this.moveLabel.setText( "Moves: " + this.movesLeft );
     }
 
     setCompletedChallenge()
@@ -263,7 +211,6 @@ export class R1C1 extends Phaser.Scene {
  
         // GAME IS COMPLETTED SUCCESS
         if (isCorrect) { 
-
             this.setCompletedChallenge(); 
             GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
 
@@ -271,8 +218,7 @@ export class R1C1 extends Phaser.Scene {
               
             this.setInfoMessage(true); 
             this.showInfoMessage(true);
-            this.congratsAudio.play();
-        } 
+        }
     }
 
     setInfoMessage(success = false)
@@ -307,15 +253,12 @@ export class R1C1 extends Phaser.Scene {
 
         this.add.text(this.cameras.main.centerX, 200, messageTitle, this.styleTitle).setOrigin(0.5).setDepth(999)
         this.add.text(this.cameras.main.centerX, 400, messageBody, this.styleBody).setOrigin(0.5).setDepth(999)
-  
+ 
+        this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 400, "Moves: "+ this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
 
-        if(this.unlimitedMoves === false){
-            this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 400, "Moves: "+ this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
-        }
-        
 
-        this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
-        this.add.existing(this.closeBtn)  
+        // this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
+        // this.add.existing(this.closeBtn)  
 
         
     }  

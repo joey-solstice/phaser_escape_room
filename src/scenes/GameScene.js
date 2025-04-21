@@ -14,8 +14,8 @@ export class GameScene extends Phaser.Scene {
     }   
 
     init(data) {
-        this.data = data;    
-        this.data.room = 1; 
+        this.data = data;      
+        console.log('MAIN GAME: ', data)
     }
 
    create() { 
@@ -25,10 +25,25 @@ export class GameScene extends Phaser.Scene {
        this.displayAssets();  
      
         this.animateBackgroundColor()
+        this.clickAudio = this.sound.add('click');
    } 
 
+   updateLives(increase = true)
+   { 
+        console.log(GameData.ROOMS[this.data.room - 1].lives)
+
+        if(GameData.ROOMS[this.data.room - 1].lives == -1) return; // -1 = Unlimited lives 
 
 
+
+        if(increase){
+            GameData.ROOMS[this.data.room - 1].lives +=1;
+        }else{
+            GameData.ROOMS[this.data.room - 1].lives -=1;
+        }
+ 
+   }
+ 
    animateBackgroundColor()
    {
         // Create a dummy object with a progress value
@@ -55,7 +70,7 @@ export class GameScene extends Phaser.Scene {
    }
      
    displayAssets() { 
-       const roomNumber = 'bg-room-' +  this.data.room;
+       const roomNumber = 'bg-room-' + this.data.room;
      
         
        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, roomNumber).setOrigin(.5); 
@@ -76,38 +91,97 @@ export class GameScene extends Phaser.Scene {
 
        this.challengeFour = new ImgButton(this, 740, 920, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 4));
        this.add.existing(this.challengeFour)  
+
+       this.createCustomTextButton(this.cameras.main.centerX , this.cameras.main.centerY + 800, () => this.nextRoom()); 
+       this.createLabel('Next Room', this.cameras.main.centerX , this.cameras.main.centerY  + 800)
    }
  
 
+   createLabel(text, x, y)
+   {
+       this.add.text(x, y, text, {
+           fontSize: '42px',
+           color: 'red', // or '#ff0000' 
+            fontStyle: 'bold'
+       }).setOrigin(.5);
+   }
+
+   createCustomTextButton(x,y, met)
+   {  
+       this.continueBtn = new ImgButton(this, x, y, 'blank-btn-round', () => met());
+       this.add.existing(this.continueBtn)  
+   }
+
    displayInfo()
    { 
-        this.scene.run(CST.SCENES.BACKSTORY);
-        this.scene.bringToTop(CST.SCENES.BACKSTORY); 
+        this.clickAudio.play();
+        this.scene.run(CST.SCENES.ROOMINFO, this.data);
+        this.scene.bringToTop(CST.SCENES.ROOMINFO); 
    }
+
+   nextRoom()
+   {
+        this.clickAudio.play();
+        const room = this.data.room;
+        const completedChallenges = GameData.ROOMS[room-1].numberOfChallengesCompleted;
+        if(completedChallenges < 4){
+            const message = {
+                room: this.data.room,
+                success: true, // just to hide the retry button
+                gameOver: false,
+                message:{title: 'Next Room is Locked.', body:  'Complete all challenges to unlock next Room.'}
+            }  
+            this.showScene(CST.SCENES.INFORMATION, message ) 
+        }else{
+
+            const message = {
+                room: this.data.room,
+                success: true, // just to hide the retry button
+                gameOver: false,
+                message:{title: 'Under construction', body:  'Room 2 not available yet.'}
+            }  
+            this.showScene(CST.SCENES.INFORMATION, message ) 
+        }
+   }
+
 
    openChallengeGame(room=1, challenge=1){
        
+        this.clickAudio.play();
+
         const isChallegeCompleted = GameData.ROOMS[room-1].challenges[challenge-1].completed;
         const sceneGameToLoad = GameData.ROOMS[room-1].challenges[challenge-1].scene;
-        const lives = 1;
+        const lives =  GameData.ROOMS[room-1].lives;
   
         const data = {lives: lives, room: room, challenge: challenge}
 
-        if(!isChallegeCompleted && lives >=1){
-           this.showScene(sceneGameToLoad, data) 
-        }else{
+        console.log('Open Challenge', room, challenge, isChallegeCompleted, sceneGameToLoad, lives)
 
-            const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
-            const total = GameData.ROOMS[this.data.room - 1].numberOfChallenges;
-
-
+        if(lives == 0 || lives <=-2)
+        {
             const message = {
-                success: true,
-                message:{title: GameData.GENERAL.challengeCompletedText, body:  GameData.ROOMS[room - 1].challenges[challenge -1].successBody(completed,total)}
-            } 
-            this.showScene(CST.SCENES.INFORMATION, message) 
-        }
-        
+                room: this.data.room,
+                success: false,
+                gameOver: true,
+                message:{title: GameData.GENERAL.gameoverTitle, body:  GameData.GENERAL.gameoverBody}
+            }  
+            this.showScene(CST.SCENES.INFORMATION, message ) 
+        }else{
+            if(!isChallegeCompleted ){
+                this.showScene(sceneGameToLoad, data) 
+             }else{ 
+                 const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
+                 const total = GameData.ROOMS[this.data.room - 1].numberOfChallenges;
+      
+                 const message = {
+                     room: this.data.room,
+                     success: true,
+                     gameOver: false,
+                     message:{title: GameData.GENERAL.challengeCompletedText, body:  GameData.ROOMS[room - 1].challenges[challenge -1].successBody(completed,total)}
+                 }  
+                 this.showScene(CST.SCENES.INFORMATION, message ) 
+             }
+        } 
    }
 
    showScene(scene, data)

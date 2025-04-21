@@ -1,5 +1,6 @@
-import { CST } from "../CST.js";
-import { ITL } from "./ITL.js"; // All Images To Load.
+import { CST } from "../CST.js"; 
+import { ITL } from "./ITL.js"; //   Images To Load.
+import { GameData } from "./GameData.js" 
 
 export class LoadScene extends Phaser.Scene {
     constructor() {
@@ -8,10 +9,11 @@ export class LoadScene extends Phaser.Scene {
 
     user_id
 
+   
+
     preload() { 
         
-        this.Audio();
-        // Load all image assets for HOME SCENE
+        this.Audio(); 
         Object.values(ITL).forEach(group => {
             group.forEach(asset => { 
               //  console.log(asset.url)
@@ -36,11 +38,33 @@ export class LoadScene extends Phaser.Scene {
 
     create() 
     {   
-        this.scene.start(CST.SCENES.R1C4, {room: 1, challenge: 4} )  // 
+        let sc = CST.SCENES.HOME;
+        let data = {}
+        if(this.isDev() === false){ 
+            data = {room: 1, challenge: 1} 
+        }else{
+            data = {
+                room: 1,
+                success: true,
+                message:{title: GameData.GENERAL.challengeCompletedText, body:  GameData.ROOMS[0].challenges[0].successBody(4,4)}
+            }
+            sc = CST.SCENES.INFORMATION;
+        }
+
+
+        console.log('data', data)
+        this.scene.start(sc, data )  // 
  
     }
-    Audio(){
-        //this.load.audio('bg', './assets/audio/bg.mp3');
+    isDev()
+    {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isd = urlParams.get('dev') === '1';
+        console.log('On Dev:', isd)
+        return isd;
+    }
+
+    Audio(){ 
         this.load.audio('click', './assets/audio/click.mp3');
         this.load.audio('congrats', './assets/audio/levelup.mp3');
         this.load.audio('popup', './assets/audio/popup.mp3');

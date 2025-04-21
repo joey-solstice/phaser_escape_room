@@ -2,6 +2,7 @@ import { CST } from "../CST.js"
 import { ImgButton } from "../prefabs/ImgButton.js" 
 import { Helper } from './Helper.js'; 
 import { AnimationManager } from './AnimationManager.js'; 
+import { GameData } from "./GameData.js";
 
 export class HomeScene extends Phaser.Scene {
     
@@ -9,6 +10,9 @@ export class HomeScene extends Phaser.Scene {
         super({ key: CST.SCENES.HOME })  
     }   
 
+    init(data){
+        this.data = data;
+    }
     create() { 
         this.helper = new Helper(this);
         this.animationManager = new AnimationManager(this);
@@ -27,6 +31,7 @@ export class HomeScene extends Phaser.Scene {
 
     startGame()
     {
-        this.scene.start(CST.SCENES.GAME); 
+        GameData.reset();
+        this.scene.start(CST.SCENES.BACKSTORY, this.data); 
     }
 }

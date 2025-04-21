@@ -11,6 +11,7 @@ export class Helper {
         if(isValid == false) return false;
         return true;
     }
+
      
     crateInputField(type = 'email', phaceholder = 'Enter your Email'){
           // Create an HTML input element

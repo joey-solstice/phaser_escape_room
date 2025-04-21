@@ -6,6 +6,7 @@
         BACKSTORY: "BACKSTORY", 
         HOWTO: "HOWTO", 
         GAME: "GAME",
+        ROOMINFO: "ROOMINFO",
         R1C1: "R1C1",
         R1C2:"R1C2",
         R1C3:"R1C3",

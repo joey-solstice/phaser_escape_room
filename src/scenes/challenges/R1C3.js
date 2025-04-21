@@ -20,29 +20,38 @@ export class R1C3 extends Phaser.Scene {
         this.styleBody =    { fontFamily: 'Montserrat', fontSize: 50, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
         this.styleCode =    { fontFamily: 'Montserrat', fontSize: 90, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
     }
-    create() { 
-        this.helper = new Helper(this);
-        this.displayAssets(); 
 
-         
-        this.challengeGame() 
- 
+    create() { 
+        this.helper = new Helper(this); 
+        this.livesUpdated = false; 
+        this.displayAssets();  
+        this.challengeGame()  
+
+        this.clickAudio = this.sound.add('click');
+        this.errorAudio = this.sound.add('error'); 
+        this.congratsAudio = this.sound.add('congrats'); 
      
     } 
 
     getGameData()
     {
         this.movesLeft =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].moves;  
-
+        this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves; 
     }
       
      
- 
+    updateMovesLeft()
+    {  
+        if(this.unlimitedMoves) return; 
+        this.movesLeft--;
+    }
+
     updateMoveLabel()
     {
+        if(this.unlimitedMoves) return;
         this.moveLabel.setText( this.moveName + ": " + this.movesLeft );
     }
-    
+
     challengeGame() {  
         this.stopGeneratePortalColor = false;
  
@@ -118,6 +127,7 @@ export class R1C3 extends Phaser.Scene {
     }
 
     handleColorClick(clickedColor) {
+        this.clickAudio.play();
         if (clickedColor === this.targetColor && clickedColor === this.currentPortalColor) {
             this.syncCount++;
             this.statusText.setText(`✅ Synced ${this.syncCount}/${this.totalSyncs}`);
@@ -129,23 +139,35 @@ export class R1C3 extends Phaser.Scene {
                 this.closePage(); 
                 this.setInfoMessage(true); 
                 this.showInfoMessage(true); 
+                
+                 this.congratsAudio.play();
 
             } else {
                 this.startNewTarget();
             }
         } else {
-            this.statusText.setText('❌ Incorrect timing!');
-        
-            this.movesLeft--;
+            this.statusText.setText('❌ Incorrect timing!'); 
+            this.updateMovesLeft();
             this.updateMoveLabel();
-            this.checkOutOfMoves(); 
+            this.checkOutOfMoves();
+            this.errorAudio.play();
         }
     }
 
     setCompletedChallenge()
     {
         GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted += 1;
-    }
+    } 
+
+    updateLives(increase = false)
+    {
+        if(this.livesUpdated) return;
+
+        this.livesUpdated = true;
+        const mainGame = this.scene.get(CST.SCENES.GAME);
+        mainGame.updateLives(increase);  
+    } 
+
     setInfoMessage(success = false)
     {
         const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
@@ -162,7 +184,7 @@ export class R1C3 extends Phaser.Scene {
 
     showInfoMessage(success = false)
     {
-        const data = {success:success, message : this.data.message}
+        const data = {success:success, message : this.data.message, fromScene: CST.SCENES.R1C3, room: this.data.room}
         this.scene.run(CST.SCENES.INFORMATION, data);
         this.scene.bringToTop(CST.SCENES.INFORMATION);
     }
@@ -195,6 +217,7 @@ export class R1C3 extends Phaser.Scene {
     {
         const outOfMoves = this.movesLeft > 0 ? false:true;
         if(outOfMoves){  
+            this.updateLives(false);
             this.closePage(); 
             this.setInfoMessage(false); 
             this.showInfoMessage(false);
@@ -216,7 +239,7 @@ export class R1C3 extends Phaser.Scene {
             this.dialed = [];
             this.codeLabel.setText('******');
             this.movesLeft--;
-            this.updateMoveLabel();
+            this();
             this.checkOutOfMoves();
         }
         
@@ -238,13 +261,13 @@ export class R1C3 extends Phaser.Scene {
  
         this.moveName =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].movesName;
 
-        this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
-
-
-      
-
-        this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
-        this.add.existing(this.closeBtn)  
+        if(this.unlimitedMoves == false){
+            this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
+        }
+       
+ 
+       this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());
+       this.add.existing(this.closeBtn)  
 
         
     }  

@@ -1,28 +1,4 @@
-/*
-import { PreLoadScene } from "./scenes/PreLoadScene.js"
-import { LoadScene } from "./scenes/LoadScene.js"
-import { GameScene } from "./scenes/GameScene.js" 
-import { GameCompleteScene } from "./scenes/GameCompleteScene.js"
-import { GameFailScene } from "./scenes/GameFailScene.js"
-import { HomeScene } from "./scenes/HomeScene.js"
-import { HowToScene } from "./scenes/HowToScene.js"
-import { MenuScene } from "./scenes/MenuScene.js"
-import { GameUI } from "./scenes/GameUI.js"
-import { GameLoadingScene } from "./scenes/GameLoading.js"
-import { LevelTimerScene } from "./scenes/LevelTimer.js"
-import { CongratsScene } from "./scenes/Congrats.js" 
-import { Prize } from "./scenes/Prize.js"
-import { Thankyou } from "./scenes/Thankyou.js"
-import { Leaderboard } from "./scenes/Leaderboard.js"
-import { Backstory } from "./scenes/Backstory.js"
-import { Share } from "./scenes/Share.js"
-import { Comingsoon } from "./scenes/Comingsoon.js"
-
-import * as Matter from "./matter-js.js"  
-*/
-
-
-import { PreLoadScene } from "./scenes/PreLoadScene.js"
+ import { PreLoadScene } from "./scenes/PreLoadScene.js"
 import { HomeScene } from "./scenes/HomeScene.js"
 import { BackStoryScene } from "./scenes/BackStory.js"
 import { GameScene } from "./scenes/GameScene.js"
@@ -39,11 +15,17 @@ import { R1C2 } from "./scenes/challenges/R1C2.js"
 import { R1C3 } from "./scenes/challenges/R1C3.js"
 import { R1C4 } from "./scenes/challenges/R1C4.js"
 
+import { R2C1 } from "./scenes/challenges/R2C1.js"
+
+import { RoomInfo } from "./scenes/RoomInfo.js"
+
 
 
 function isDesktop() {
     return !navigator.userAgent.match(/Mobi/);
 }
+
+
 
 var config = {
     type: Phaser.CANVAS,
@@ -64,10 +46,12 @@ var config = {
         HomeScene,
         BackStoryScene,
         GameScene,  
+        RoomInfo,
         R1C1,
         R1C2,
         R1C3,
         R1C4,
+        R2C1,
         InformationScene,
         HowToScene,
         CongratsScene,

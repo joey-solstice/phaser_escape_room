@@ -23,24 +23,22 @@ export class R1C4 extends Phaser.Scene {
     }
     create() { 
         this.helper = new Helper(this);
-        this.displayAssets(); 
-
-         
-        this.challengeGame()  
-     
+        this.livesUpdated = false;
+        this.displayAssets();  
+        this.challengeGame()   
+ 
+        this.clickAudio = this.sound.add('click');
+        this.errorAudio = this.sound.add('error'); 
+        this.congratsAudio = this.sound.add('congrats'); 
     } 
 
     getGameData()
     {
         this.movesLeft =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].moves;  
-
+        this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves; 
     } 
  
-    updateMoveLabel()
-    {
-        this.moveLabel.setText( this.moveName + ": " + this.movesLeft );
-    }
-    
+     
     challengeGame() { 
         this.riddle = "What has keys but can't open locks?";
         this.answer = "PIANO"; // Correct answer (uppercase) 
@@ -114,7 +112,9 @@ export class R1C4 extends Phaser.Scene {
     }
 
     handleLetterClick(letter, btn) {
-        btn.disableInteractive();
+        this.clickAudio.play();
+
+        //btn.disableInteractive();
         this.clickedLetters.push(letter);
 
         const display = this.clickedLetters.join('');
@@ -123,20 +123,60 @@ export class R1C4 extends Phaser.Scene {
         if (this.clickedLetters.length === this.answer.length) {
             if (display === this.answer) {
                 this.statusText.setText('✅ You solved the riddle!');
-                this.setCompletedChallenge();
+               
                 GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
 
+                this.setCompletedChallenge(); 
+                this.closePage(); 
+                this.setInfoMessage(true); 
+                this.showInfoMessage(true);
+                this.congratsAudio.play()
             } else { 
                 this.answerText.setText('');
-                
+                this.clickedLetters = [];
+                this.updateMovesLeft()
+                this.updateMoveLabel();
+                this.checkOutOfMoves();
+                this.errorAudio.play()
             }
         }
     }
- 
+
+    updateMovesLeft()
+    {  
+        if(this.unlimitedMoves) return; 
+        this.movesLeft--;
+    }
+
+    updateMoveLabel()
+    {
+        if(this.unlimitedMoves) return;
+        this.moveLabel.setText( this.moveName + ": " + this.movesLeft );
+    }
+
+    checkOutOfMoves()
+    {
+        const outOfMoves = this.movesLeft > 0 ? false:true;
+        if(outOfMoves){  
+            this.updateLives(false);
+            this.closePage(); 
+            this.setInfoMessage(false); 
+            this.showInfoMessage(false);
+        }
+    }
     setCompletedChallenge()
     {
         GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted += 1;
     }
+
+    updateLives(increase = false)
+    {
+        if(this.livesUpdated) return;
+
+        this.livesUpdated = true;
+        const mainGame = this.scene.get(CST.SCENES.GAME);
+        mainGame.updateLives(increase);  
+    }  
     setInfoMessage(success = false)
     {
         const completed = GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted;
@@ -153,7 +193,7 @@ export class R1C4 extends Phaser.Scene {
 
     showInfoMessage(success = false)
     {
-        const data = {success:success, message : this.data.message}
+        const data = {success:success, message : this.data.message, fromScene: CST.SCENES.R1C4, room: this.data.room}
         this.scene.run(CST.SCENES.INFORMATION, data);
         this.scene.bringToTop(CST.SCENES.INFORMATION);
     }
@@ -171,8 +211,10 @@ export class R1C4 extends Phaser.Scene {
  
         this.moveName =  GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].movesName;
 
-        this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
-
+        
+        if(this.unlimitedMoves == false){
+            this.moveLabel = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 500, this.moveName + ": " + this.movesLeft, this.styleBody).setOrigin(0.5).setDepth(999)
+        }
 
        
         this.closeBtn = new ImgButton(this, this.cameras.main.centerX + 470,  80, 'close-btn-round', () => this.closePage());

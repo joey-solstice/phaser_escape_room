@@ -1,8 +1,10 @@
+// ITL = Images To Load
+
 export const ITL = {
     HOME : [ 
         {key: 'homeBg', url:  './assets/img/scene/home/home_bg.png', name: 'Home Background'}, 
         {key: 'playBtn', url:  './assets/img/scene/home/play.png', name: 'Play Button'}, 
-    ],
+    ], 
     BACKSTORY : [ 
         {key: 'backstory-room-1', url:  './assets/img/scene/backstory/room-1.png', name: 'Backstory Room 1'},  
         {key: 'backstory-room-2', url:  './assets/img/scene/backstory/room-1.png', name: 'Backstory Room 2'},  
@@ -13,11 +15,7 @@ export const ITL = {
         {key: 'room-1-btn-collision', url:  './assets/img/scene/game/room-1-btn-collision.png', name: 'Game Room 1 Button Collision'}, 
     ],
     GAMEROOM : [
-        {   
-            key: 'room-1-game-bg', 
-            url:  './assets/img/scene/game/game-bg-1.png', 
-            name: 'Game Background Room 1', 
-        }, 
+        { key: 'room-1-game-bg',  url:  './assets/img/scene/game/game-bg-1.png',  name: 'Game Background Room 1'}, 
         
     ],
     CHALLENGE1: [  
@@ -34,7 +32,12 @@ export const ITL = {
     GENERAL :[
         {key: 'close-btn-round', url:  './assets/img/general/close.png', name: 'Round Close Button'}, 
         {key: 'start-btn-general', url:  './assets/img/general/start.png', name: 'Start Button'}, 
-        {key: 'information-bg-general', url:  './assets/img/general/information.png', name: 'Information Background'}, 
+        {key: 'info-bg-general', url:  './assets/img/general/information.png', name: 'Information Background'}, 
         {key: 'continue-btn-round', url:  './assets/img/general/continue.png', name: 'Continue Button'}, 
+        {key: 'blank-btn-round', url:  './assets/img/general/blankbutton.png', name: 'Blank Button'}, 
+        {key: 'up-btn', url:  './assets/img/general/up.png', name: 'Up Button'}, 
+        {key: 'down-btn', url:  './assets/img/general/down.png', name: 'Down Button'}, 
+        {key: 'left-btn', url:  './assets/img/general/left.png', name: 'Left Button'}, 
+        {key: 'right-btn', url:  './assets/img/general/right.png', name: 'Right Button'}, 
     ]
 }

@@ -14,13 +14,15 @@ export class InformationScene extends Phaser.Scene {
     }    
  
 
-    init(data) {
-        console.log('Inforamation Scene', data)
+    init(data) { 
         this.data = data; 
+        console.log('Info',data);
         const fill = this.data.success ? '#008000' : '#FF474C'; 
 
         this.styleTitle =    { fontFamily: 'Montserrat', fontSize: 54, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
         this.styleBody =    { fontFamily: 'Montserrat', fontSize: 80, fill: fill, align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
+        this.lives = GameData.ROOMS[this.data.room -1].lives;  
+        console.log('Info lives', this.lives);
     }
 
     create() { 
@@ -31,21 +33,65 @@ export class InformationScene extends Phaser.Scene {
     } 
       
     displayAssets() {  
-        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'information-bg-general').setOrigin(.5); 
+        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'info-bg-general').setOrigin(.5); 
         this.pageBg.setInteractive() 
 
         this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, this.data.message.title, this.styleTitle).setOrigin(0.5).setDepth(999)
         this.add.text(this.cameras.main.centerX, this.cameras.main.centerY+100, this.data.message.body, this.styleBody).setOrigin(0.5).setDepth(999)
 
         
-
-        this.continueBtn = new ImgButton(this, this.cameras.main.centerX,this.cameras.main.centerY + 600, 'continue-btn-round', () => this.closePage());
-        this.add.existing(this.continueBtn)  
+  
+        if(this.data.gameOver === true ){
+            this.createCustomTextButton(this.cameras.main.centerX, this.cameras.main.centerY + 600, () => this.restartGame()) 
+            this.createLabel('RESTART GAME', this.cameras.main.centerX , this.cameras.main.centerY + 600)
+     
+        }else{
+            
+            if(!this.data.success){
+                this.createCustomTextButton(this.cameras.main.centerX - 300, this.cameras.main.centerY + 600, () => this.restartPage()) 
+                 
+                let retryLabelButton = this.live > 0 ? `RETRY(${this.lives})` : 'RETRY'; 
+                this.createLabel(retryLabelButton, this.cameras.main.centerX - 300, this.cameras.main.centerY + 600) 
+            }
+           
+    
+            this.createCustomTextButton(this.cameras.main.centerX + 300, this.cameras.main.centerY + 600, () => this.closePage()) 
+            this.createLabel('CONTINUE', this.cameras.main.centerX + 300, this.cameras.main.centerY + 600)
+        } 
     }
     
+
+    createLabel(text, x, y)
+    {
+        this.add.text(x, y, text, {
+            fontSize: '42px',
+            color: 'red', // or '#ff0000' 
+             fontStyle: 'bold'
+        }).setOrigin(.5);
+    }
+
+    createCustomTextButton(x,y, met)
+    {  
+        this.continueBtn = new ImgButton(this, x, y, 'blank-btn-round', () => met());
+        this.add.existing(this.continueBtn)  
+    }
   
     closePage()
+    {  
+        this.scene.stop(CST.SCENES.INFORMATION);  
+    }
+    restartPage()
     { 
-        this.scene.stop(CST.SCENES.INFORMATION)  
+        if(this.lives == 0 ) return;
+        if(this.lives <= -2) return;
+
+        this.scene.start(this.data.fromScene);    
     } 
+   
+    restartGame()
+    {
+        this.scene.stop(CST.SCENES.INFORMATION);  
+        this.scene.stop(CST.SCENES.GAME)  
+        this.scene.start(CST.SCENES.HOME) 
+    }
 }
