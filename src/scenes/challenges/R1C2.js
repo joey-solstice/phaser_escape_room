@@ -72,6 +72,9 @@ export class R1C2 extends Phaser.Scene {
     }
     
     challengeGame() { 
+
+      
+        
         const gridRows = 3;
         const gridCols = 3;
         const tileSize = 150;

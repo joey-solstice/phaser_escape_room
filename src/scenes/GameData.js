@@ -8,6 +8,13 @@ export const GameData = {
     },
     ROOMS:  [
         {
+            buttons: [
+                {x:80,     y: 670}, 
+                {x:380,    y: 575},
+                {x:740,    y:555},
+                {x:400,     y: 900},
+                {x:740,     y: 920}, 
+            ],
             name: "Room 1: The Fractured Gateway", 
             description: "You find yourself in a digital rift where reality is glitching. You must stabilize the portal before they get permanently trapped in a fragmented dimension.",
             lives:  -1, // Lives per room. -1 = unlimited
@@ -74,6 +81,13 @@ export const GameData = {
             ], 
         },
         {
+            buttons: [
+                {x:80,     y: 670}, 
+                {x:380,    y: 575},
+                {x:740,    y:555},
+                {x:400,     y: 900},
+                {x:740,     y: 920}, 
+            ],
             name: "Room 2: Paradox Lab", 
             description: "In this dimension, time loops unpredictably. Players must outthink paradoxes and manipulate time distortions to escape.",
             lives: -1, // Lives per room. -1 = unlimited
@@ -81,7 +95,7 @@ export const GameData = {
             numberOfChallengesCompleted: 0, 
             challenges: [ 
                 {
-                    room  : 1,
+                    room  : 2,
                     challenge: 1,
                     scene: "R2C1", // Room 2 Challenge 1
                     name:"Inverted Instructions", description: "A challenge where all directions must be interpreted backward.",
@@ -89,47 +103,51 @@ export const GameData = {
                     successBody: (count, total) => `${count} of ${total} Challenges Completed`,
                     gameoverTitle: "Reassembly Failed.",
                     gameoverBody: "You're out of moves.",
-                    movesName: "Moves",
-                    moves: 15,
+                    movesName: "Tries",
+                    moves: 3,
+                    unlimitedMoves: true,
                     completed: false,
                 },  
                 {  
-                    room  : 1, 
+                    room  : 2, 
                     challenge: 2,
                     scene: "R2C2", // Room 2 Challenge 2
-                    name:"Echoes of the Future", description: "Solve a puzzle where answers appear before the question is revealed.",
+                    name:"Singularity Code", description: "Crack a shifting cipher that rearranges with every mistake.",
                     successTitle: "Soundwave Decoded Successfully",
                     successBody: (count, total) => `${count} of ${total} Challenges Completed`,
                     gameoverTitle: "Decoding Failed.",
                     gameoverBody: "You're out of tries",
                     movesName : "Tries",
                     moves: 3,
+                    unlimitedMoves: true,
                     completed: false,
                 },
                 {  
-                    room  : 1, 
+                    room  : 2, 
                     challenge: 3,
-                    scene: "R3C3", // Room 1 Challenge 3
-                    name:"Color Frequency Puzzle", description: "Match shifting colors to synchronize the portal energy.",
+                    scene: "R2C3", // Room 1 Challenge 3
+                    name:"Echoes of the Future", description: "Solve a puzzle where answers appear before the question is revealed.",
                     successTitle: "Color Puzzle Solved",
                     successBody: (count, total) => `${count} of ${total} Challenges Completed`,
                     gameoverTitle: "Color Puzzle Failed.",
                     gameoverBody: "You're out of tries",
                     movesName : "Tries",
                     moves: 4,
+                    unlimitedMoves: true,
                     completed: false,
                 },
                 {  
-                    room  : 1, 
+                    room  : 2, 
                     challenge: 4,
-                    scene: "R4C4", // Room 1 Challenge 3
-                    name:"Logic Bridge", description: "Solve a paradoxical riddle to unlock the next segment.",
+                    scene: "R2C4", // Room 1 Challenge 3
+                    name:"Quantum Shift", description: "Manipulate different timelines to align a coherent path forward.",
                     successTitle: "Riddle Completed",
                     successBody: (count, total) => `${count} of ${total} Challenges Completed`,
                     gameoverTitle: "Riddle Failed.",
                     gameoverBody: "You're out of tries",
                     movesName : "Tries",
                     moves: 3,
+                    unlimitedMoves: true,
                     completed: false,
                 },
             ], 

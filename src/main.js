@@ -16,6 +16,9 @@ import { R1C3 } from "./scenes/challenges/R1C3.js"
 import { R1C4 } from "./scenes/challenges/R1C4.js"
 
 import { R2C1 } from "./scenes/challenges/R2C1.js"
+import { R2C2 } from "./scenes/challenges/R2C2.js"
+import { R2C3 } from "./scenes/challenges/R2C3.js"
+import { R2C4 } from "./scenes/challenges/R2C4.js"
 
 import { RoomInfo } from "./scenes/RoomInfo.js"
 
@@ -52,6 +55,9 @@ var config = {
         R1C3,
         R1C4,
         R2C1,
+        R2C2,
+        R2C3,
+        R2C4,
         InformationScene,
         HowToScene,
         CongratsScene,

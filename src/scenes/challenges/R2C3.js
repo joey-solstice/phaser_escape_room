@@ -4,18 +4,16 @@ import { Helper } from '../Helper.js';
 import { GameData } from "../GameData.js";
 
 
-export class R2C1 extends Phaser.Scene {
+export class R2C3 extends Phaser.Scene {
     
     constructor() {
-        super({ key: CST.SCENES.R2C1})  
+        super({ key: CST.SCENES.R2C3})  
     }   
 
     init(data){
         this.data = data;
         this.data.message = {title:"", body:""} 
- 
- 
-
+  
         this.styleTitle =    { fontFamily: 'Montserrat', fontSize: 54, fill: '#ffffff', align: 'center',fontStyle: 'bold' }    
         this.styleBody =    { fontFamily: 'Montserrat', fontSize: 50, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
     }
@@ -32,8 +30,7 @@ export class R2C1 extends Phaser.Scene {
 
         this.displayAssets();  
         this.challengeOne();
-
-        
+ 
     } 
       
     getGameData()
@@ -42,113 +39,34 @@ export class R2C1 extends Phaser.Scene {
         this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves; 
     }
       
-
+ 
+    
     challengeOne() { 
-       
-        this.syncCount = 0;
-        this.totalSyncs = 4;
+ 
 
-        this.directions = ['LEFT', 'RIGHT', 'UP', 'DOWN'];
-        this.invertedMap = {
-            LEFT: 'RIGHT',
-            RIGHT: 'LEFT',
-            UP: 'DOWN',
-            DOWN: 'UP'
-        };
-
-        this.centerX = this.cameras.main.centerX;
-        this.centerY = this.cameras.main.centerY;
-
-        // Instruction text
-        this.instructionText = this.add.text(this.centerX, this.centerY - 200, '', {
-            fontSize: '90px Bold',
-            color: '#ffffff',
-            
-        }).setOrigin(0.5);
-
-        this.statusText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 150, '', {
-            fontSize: '44px',
-            color: '#00ff00',
-        }).setOrigin(0.5);
-
-        // Placeholder for buttons
-        this.buttons = [];
-
-        this.showInstruction();
+        this.colors = [
+            0xff0000, 0x00ff00, 0x0000ff,
+            0xffff00, 0xff00ff, 0x00ffff,
+            0xffffff, 0x888888, 0xff8800,
+            0x8800ff, 0x00ff88, 0x8888ff
+          ];
+        this.level = 1;
+        this.maxLevel = 3;
+        this.sequence = [];
+        this.userChoices = [];
          
-    }
-
-
-    showInstruction() {
-        // Pick random instruction
-        this.currentInstruction = Phaser.Utils.Array.GetRandom(this.directions);
-        this.instructionText.setText(this.currentInstruction);
-
-        // Clear existing buttons
-        this.buttons.forEach(btn => btn.destroy());
-        this.buttons = [];
-
-        // Shuffle directions
-        const shuffled = Phaser.Utils.Array.Shuffle([...this.directions]);
-
-        // Create buttons in a row (spaced evenly)
-        const startX = this.centerX - 270;
-        shuffled.forEach((dir, index) => {
-            const x = startX + index * 180;
-            const btn = this.add.image(x, this.centerY, dir.toLowerCase() + "-btn").setInteractive().setScale(1);
-            btn.on('pointerdown', () => this.checkInput(dir));
-            this.buttons.push(btn);
-        });
-    }
-
-    checkInput(selectedDirection) {
-        this.clickAudio.play(); 
-        const correctDirection = this.invertedMap[this.currentInstruction];
-        if (selectedDirection === correctDirection) {
-            //console.log(`✅ Correct! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
-            
-            this.syncCount++;
-            this.statusText.setText(`✅ Synced ${this.syncCount}/${this.totalSyncs}`); 
-            
-            if (this.syncCount >= this.totalSyncs) {
-                this.setCompletedChallenge();
-                GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
-                this.resetScore();
-                this.closePage(); 
-                this.setInfoMessage(true); 
-                this.showInfoMessage(true); 
-                this.congratsAudio.play(); 
-            } else {
-                this.showInstruction(); // Next round
-            }
-
-
-        } else {
-            //  console.log(`❌ Wrong! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
-            this.statusText.setText('❌ Incorrect Direction!'); 
-            this.updateMovesLeft(); 
-            this.updateMoveLabel(); 
-            this.checkOutOfMoves();
-            this.resetScore();
-            this.errorAudio.play();
-            this.showInstruction(); // Next round
-        }
-    }
-      
-    checkOutOfMoves()
-    { 
-        const outOfMoves = this.movesLeft > 0 ? false:true;
-        if(outOfMoves){          
-            this.updateLives(false);
-            this.closePage(); 
-            this.setInfoMessage(false); 
-            this.showInfoMessage(false);
-        }
-    }
-
+        this.instructionText = this.add.text( this.cameras.main.centerX, this.cameras.main.centerY - 250, '', {
+        fontSize: '50px', color: '#00ffff',
+        align: 'center',
+        wordWrap: {  width: 900,  useAdvancedWrap: true }
+        }).setOrigin(0.5);
+    
+        this.generateSequence();
+    } 
+  
     resetScore()
     {
-        this.syncCount = 0;
+        this.score = 0;
     }
  
     updateLives(increase = false)
@@ -173,24 +91,14 @@ export class R2C1 extends Phaser.Scene {
             this.data.message.body  = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].gameoverBody;
         } 
     }
-
-
-    arraysAreEqual(a, b) {
-        if (a.length !== b.length) return false;
-        for (let i = 0; i < a.length; i++) {
-            if (a[i] !== b[i]) return false;
-        }
-        return true;
-    }
  
-
     updateMovesLeft()
     {  
         if(this.unlimitedMoves) return; 
         this.movesLeft--;
     }
 
-    updateMoveLabel()
+    updateMoveLabel()  
     {
         if(this.unlimitedMoves) return;
         this.moveLabel.setText( this.moveName + ": " + this.movesLeft );
@@ -198,7 +106,7 @@ export class R2C1 extends Phaser.Scene {
 
     checkOutOfMoves()
     { 
-        
+        console.log('Moves Left', this.movesLeft)
         const outOfMoves = this.movesLeft > 0 ? false:true;
         if(outOfMoves){          
             this.updateLives(false);
@@ -213,13 +121,6 @@ export class R2C1 extends Phaser.Scene {
     setCompletedChallenge()
     {
         GameData.ROOMS[this.data.room - 1].numberOfChallengesCompleted += 1;
-    }
-
-    resetSelection() {
-        if (this.selectedTile) this.selectedTile.outline.setVisible(false);
-         if (this.secondTile) this.secondTile.outline.setVisible(false);
-        this.selectedTile = null;
-        this.secondTile = null;
     }
  
 
@@ -267,12 +168,131 @@ export class R2C1 extends Phaser.Scene {
 
         
     }  
+
+    challegeCompletted()
+    {
+        this.setCompletedChallenge();
+        GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
+        this.resetScore();
+        this.closePage(); 
+        this.setInfoMessage(true); 
+        this.showInfoMessage(true); 
+        this.congratsAudio.play(); 
+    }
     startGame(challenge = 1)
     {
         this.startBtn.setVisible(false);
     }
     closePage()
     { 
-        this.scene.stop(CST.SCENES.R2C1);
+        this.scene.stop(CST.SCENES.R2C3);
     }
+
+
+    // GAME CODE
+
+    generateSequence() {
+        this.sequence = Phaser.Utils.Array.Shuffle([...this.colors]).slice(0, 1 + this.level);
+        this.instructionText.setText(`Level ${this.level}: Memorize these colors`);
+        this.showSequence(0);
+    }
+    
+      showSequence(index) {
+        if (index >= this.sequence.length) {
+          this.time.delayedCall(1000, () => this.showChoices());
+          return;
+        }
+    
+        const color = this.sequence[index];
+        const box = this.add.rectangle(this.cameras.main.centerX, this.cameras.main.centerY - 100, 100, 100, color).setOrigin(0.5);
+    
+        this.time.delayedCall(1500, () => {
+          box.destroy();
+          this.showSequence(index + 1);
+        });
+      }
+    
+      showChoices() {
+        this.instructionText.setText('Select the colors you saw');
+        this.userChoices = [];
+        this.choiceBoxes = [];
+        const shuffledColors = Phaser.Utils.Array.Shuffle([...this.colors]);
+        let x = 200, y = this.cameras.main.centerY ;
+    
+        shuffledColors.slice(0, 12).forEach((color, index) => {
+          const box = this.add.rectangle(x, y, 120, 120, color).setInteractive();
+          box.colorValue = color;
+    
+          box.on('pointerdown', () => this.handleChoice(box));
+    
+          this.choiceBoxes.push(box);
+          x += 140;
+          if ((index + 1) % 6 === 0) {
+            x = 200;
+            y += 140;
+          }
+        });
+    
+        this.startAnswerTimer();
+      }
+    
+      handleChoice(box) {
+        if (this.userChoices.includes(box.colorValue)) return; // avoid duplicate
+        this.userChoices.push(box.colorValue);
+        box.setStrokeStyle(4, 0xffffff);
+    
+        if (this.userChoices.length === this.sequence.length) {
+          this.validateChoices();
+        }
+      }
+    
+      validateChoices() {
+        const correct = this.sequence.every(color => this.userChoices.includes(color));
+        if (correct) {
+          this.instructionText.setText('✅ Correct!'); 
+          
+          this.resetRound(true);
+
+        } else {
+          this.instructionText.setText('❌ Wrong!'); 
+          this.updateMovesLeft(); 
+          this.updateMoveLabel(); 
+          this.checkOutOfMoves();
+          this.resetScore();
+          this.errorAudio.play(); 
+          this.resetRound();
+        }
+      }
+    
+      startAnswerTimer() {
+        
+      }
+
+      resetRound(correct) {
+
+        if(this.level >= this.maxLevel)
+        {
+          this.challegeCompletted();
+          return;
+        }
+        // Clear previous boxes
+        if (this.choiceBoxes) {
+          this.choiceBoxes.forEach(box => box.destroy());
+        }
+      
+         // ✅ Cancel existing timer if still active
+        if (this.timer) {
+            this.timer.remove(false);
+        }
+
+        if (correct) {
+          this.level = Math.min(this.level + 1, this.maxLevel);
+        } else {
+          this.level = 1;
+        }
+      
+        this.time.delayedCall(1000, () => {
+          this.generateSequence();
+        });
+      }
 }

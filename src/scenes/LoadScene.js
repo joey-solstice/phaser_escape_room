@@ -41,7 +41,7 @@ export class LoadScene extends Phaser.Scene {
         let sc = CST.SCENES.HOME;
         let data = {}
         if(this.isDev() === false){ 
-            data = {room: 1, challenge: 1} 
+            data = {room: 2, challenge: 1} 
         }else{
             data = {
                 room: 1,

@@ -4,18 +4,16 @@ import { Helper } from '../Helper.js';
 import { GameData } from "../GameData.js";
 
 
-export class R2C1 extends Phaser.Scene {
+export class R2C2 extends Phaser.Scene {
     
     constructor() {
-        super({ key: CST.SCENES.R2C1})  
+        super({ key: CST.SCENES.R2C2})  
     }   
 
     init(data){
         this.data = data;
         this.data.message = {title:"", body:""} 
- 
- 
-
+  
         this.styleTitle =    { fontFamily: 'Montserrat', fontSize: 54, fill: '#ffffff', align: 'center',fontStyle: 'bold' }    
         this.styleBody =    { fontFamily: 'Montserrat', fontSize: 50, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
     }
@@ -32,8 +30,7 @@ export class R2C1 extends Phaser.Scene {
 
         this.displayAssets();  
         this.challengeOne();
-
-        
+ 
     } 
       
     getGameData()
@@ -42,98 +39,137 @@ export class R2C1 extends Phaser.Scene {
         this.unlimitedMoves = GameData.ROOMS[this.data.room - 1].challenges[this.data.challenge -1].unlimitedMoves; 
     }
       
+ 
+    
+    challengeOne() {
+        this.t9Map = {
+            2: ['A', 'B', 'C'],
+            3: ['D', 'E', 'F'],
+            4: ['G', 'H', 'I'],
+            5: ['J', 'K', 'L'],
+            6: ['M', 'N', 'O'],
+            7: ['P', 'Q', 'R', 'S'],
+            8: ['T', 'U', 'V'],
+            9: ['W', 'X', 'Y', 'Z']
+          };
 
-    challengeOne() { 
-       
-        this.syncCount = 0;
-        this.totalSyncs = 4;
+        this.score = 0;
+        this.maxScore = 3;
+        this.timeLimit = 60;
 
-        this.directions = ['LEFT', 'RIGHT', 'UP', 'DOWN'];
-        this.invertedMap = {
-            LEFT: 'RIGHT',
-            RIGHT: 'LEFT',
-            UP: 'DOWN',
-            DOWN: 'UP'
-        };
+        this.letterButtons = [];
+        this.currentAnswer = [];
+        this.userAnswer = [];
 
-        this.centerX = this.cameras.main.centerX;
-        this.centerY = this.cameras.main.centerY;
+        this.timerText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 300, '', { fontSize: '74px', color: '#fff' }).setOrigin(0.5);
+        this.cipherText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, '', { fontSize: '78px', color: '#ff0' }).setOrigin(0.5);
+        this.scoreText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 400, 'Score: 0', { fontSize: '54px', color: '#0f0' }).setOrigin(0.5);
 
-        // Instruction text
-        this.instructionText = this.add.text(this.centerX, this.centerY - 200, '', {
-            fontSize: '90px Bold',
-            color: '#ffffff',
-            
-        }).setOrigin(0.5);
+        this.createLetterButtons();
+        this.generateCipher();
+        this.startTimer();
+    } 
 
-        this.statusText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 150, '', {
-            fontSize: '44px',
-            color: '#00ff00',
-        }).setOrigin(0.5);
+    createLetterButtons() {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let x = 140, y = this.cameras.main.centerY - 100;
+        [...letters].forEach((letter, i) => {
+            const btn = this.add.text(x, y, letter, {
+            fontSize: '42px', backgroundColor: '#222', padding: 30, color: '#fff'
+            }).setInteractive();
 
-        // Placeholder for buttons
-        this.buttons = [];
+            btn.on('pointerdown', () => this.handleLetterClick(letter));
+            this.letterButtons.push(btn);
 
-        this.showInstruction();
-         
-    }
-
-
-    showInstruction() {
-        // Pick random instruction
-        this.currentInstruction = Phaser.Utils.Array.GetRandom(this.directions);
-        this.instructionText.setText(this.currentInstruction);
-
-        // Clear existing buttons
-        this.buttons.forEach(btn => btn.destroy());
-        this.buttons = [];
-
-        // Shuffle directions
-        const shuffled = Phaser.Utils.Array.Shuffle([...this.directions]);
-
-        // Create buttons in a row (spaced evenly)
-        const startX = this.centerX - 270;
-        shuffled.forEach((dir, index) => {
-            const x = startX + index * 180;
-            const btn = this.add.image(x, this.centerY, dir.toLowerCase() + "-btn").setInteractive().setScale(1);
-            btn.on('pointerdown', () => this.checkInput(dir));
-            this.buttons.push(btn);
+            x += 100;
+            if ((i + 1) % 8 === 0) {
+                x = 140;
+                y += 110;
+            }
         });
     }
 
-    checkInput(selectedDirection) {
-        this.clickAudio.play(); 
-        const correctDirection = this.invertedMap[this.currentInstruction];
-        if (selectedDirection === correctDirection) {
-            //console.log(`✅ Correct! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
-            
-            this.syncCount++;
-            this.statusText.setText(`✅ Synced ${this.syncCount}/${this.totalSyncs}`); 
-            
-            if (this.syncCount >= this.totalSyncs) {
-                this.setCompletedChallenge();
-                GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
-                this.resetScore();
-                this.closePage(); 
-                this.setInfoMessage(true); 
-                this.showInfoMessage(true); 
-                this.congratsAudio.play(); 
-            } else {
-                this.showInstruction(); // Next round
-            }
+    generateCipher() {
+        this.userAnswer = [];
+        this.currentAnswer = [];
+        this.currentCipher = [];
 
+        for (let i = 0; i < 3; i++) {
+            const key = Phaser.Math.Between(2, 9);
+            const chars = this.t9Map[key];
+            const press = Phaser.Math.Between(1, chars.length);
+            const letter = chars[press - 1];
+            this.currentAnswer.push(letter);
+            this.currentCipher.push(`${key}${press}`);
+        }
 
-        } else {
-            //  console.log(`❌ Wrong! Instruction: ${this.currentInstruction}, You pressed: ${selectedDirection}`);
-            this.statusText.setText('❌ Incorrect Direction!'); 
-            this.updateMovesLeft(); 
-            this.updateMoveLabel(); 
-            this.checkOutOfMoves();
-            this.resetScore();
-            this.errorAudio.play();
-            this.showInstruction(); // Next round
+        this.updateCipherDisplay();
+    }
+
+    handleLetterClick(letter) {
+        this.userAnswer.push(letter);
+        if (this.userAnswer.length === 3) {
+            this.validateAnswer();
         }
     }
+
+    updateCipherDisplay() {
+        let display = this.currentCipher.map((c, i) => this.userAnswer[i] || c).join(' ');
+        this.cipherText.setText(`Cipher: ${display}`);
+      }
+    
+      handleLetterClick(letter) {
+        this.clickAudio.play();
+        this.userAnswer.push(letter);
+        this.updateCipherDisplay();
+        if (this.userAnswer.length === 3) {
+          this.validateAnswer();
+        }
+      }
+
+    validateAnswer() {
+        if (this.userAnswer.join('') === this.currentAnswer.join('')) {
+            this.score++;
+            if (this.score >= this.maxScore) {
+                this.scoreText.setText('✔ You Win!');
+                this.time.delayedCall(500, () => this.challegeCompletted());
+                return;
+            } else {
+                this.scoreText.setText(`Score: ${this.score}`);
+                this.generateCipher();
+                this.resetTimer();
+            }
+        } else {
+            this.errorAudio.play();
+            this.score = 0;
+            this.scoreText.setText('❌ Wrong! Back to 0');
+            this.time.delayedCall(1500, () => this.scene.restart());
+        }
+    }
+
+    startTimer() {
+        this.timer = this.time.addEvent({
+            delay: 1000,
+            loop: true,
+            callback: () => {
+                this.timeLimit--;
+                this.timerText.setText(`Time: ${this.timeLimit}s`);
+
+                if (this.timeLimit <= 0) {
+                    this.score = 0;
+                    this.scoreText.setText(`⏰ Time's up! Back to 0`);
+                    this.time.delayedCall(1500, () => this.scene.restart());
+                }
+            }
+        });
+    }
+
+    resetTimer() {
+        this.timeLimit = 60;
+        this.timerText.setText(`Time: ${this.timeLimit}s`);
+    }
+
+    //
       
     checkOutOfMoves()
     { 
@@ -148,7 +184,7 @@ export class R2C1 extends Phaser.Scene {
 
     resetScore()
     {
-        this.syncCount = 0;
+        this.score = 0;
     }
  
     updateLives(increase = false)
@@ -267,12 +303,23 @@ export class R2C1 extends Phaser.Scene {
 
         
     }  
+
+    challegeCompletted()
+    {
+        this.setCompletedChallenge();
+        GameData.ROOMS[this.data.room-1].challenges[this.data.challenge-1].completed = true;
+        this.resetScore();
+        this.closePage(); 
+        this.setInfoMessage(true); 
+        this.showInfoMessage(true); 
+        this.congratsAudio.play(); 
+    }
     startGame(challenge = 1)
     {
         this.startBtn.setVisible(false);
     }
     closePage()
     { 
-        this.scene.stop(CST.SCENES.R2C1);
+        this.scene.stop(CST.SCENES.R2C2);
     }
 }

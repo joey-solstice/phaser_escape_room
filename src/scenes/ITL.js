@@ -11,7 +11,8 @@ export const ITL = {
         {key: 'backstory-room-3', url:  './assets/img/scene/backstory/room-1.png', name: 'Backstory Room 3'},  
     ],
     GAME : [ 
-        {key: 'bg-room-1', url:  './assets/img/scene/game/room-1.png', name: 'Game Background Main Lobby For Room1'},  
+        {key: 'bg-room-1', url:  './assets/img/scene/game/room-1.png', name: 'Game Background Main Lobby For Room 1'},  
+        {key: 'bg-room-2', url:  './assets/img/scene/game/room-2.png', name: 'Game Background Main Lobby For Room 2'},  
         {key: 'room-1-btn-collision', url:  './assets/img/scene/game/room-1-btn-collision.png', name: 'Game Room 1 Button Collision'}, 
     ],
     GAMEROOM : [

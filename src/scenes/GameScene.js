@@ -76,20 +76,21 @@ export class GameScene extends Phaser.Scene {
        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, roomNumber).setOrigin(.5); 
        this.pageBg.setInteractive() 
  
+       console.log(GameData.ROOMS[this.data.room -1].buttons[0].x,GameData.ROOMS[this.data.room-1].buttons[0].y);
 
-       this.closeBtn = new ImgButton(this, 80, 670, 'room-1-btn-collision', () => this.displayInfo());
+       this.closeBtn = new ImgButton(this, GameData.ROOMS[this.data.room -1].buttons[0].x, GameData.ROOMS[this.data.room-1].buttons[0].y, 'room-1-btn-collision', () => this.displayInfo());
        this.add.existing(this.closeBtn)  
 
-       this.challengeOne = new ImgButton(this, 380, 575, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 1));
+       this.challengeOne = new ImgButton(this, GameData.ROOMS[this.data.room -1].buttons[1].x,GameData.ROOMS[this.data.room-1].buttons[1].y, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 1));
        this.add.existing(this.challengeOne)  
 
-       this.challengeTwo = new ImgButton(this, 740, 555, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 2));
+       this.challengeTwo = new ImgButton(this, GameData.ROOMS[this.data.room -1].buttons[2].x,GameData.ROOMS[this.data.room-1].buttons[2].y, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 2));
        this.add.existing(this.challengeTwo)  
 
-       this.challengeThree = new ImgButton(this, 400, 900, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 3));
+       this.challengeThree = new ImgButton(this, GameData.ROOMS[this.data.room -1].buttons[3].x,GameData.ROOMS[this.data.room-1].buttons[3].y, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 3));
        this.add.existing(this.challengeThree)  
 
-       this.challengeFour = new ImgButton(this, 740, 920, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 4));
+       this.challengeFour = new ImgButton(this, GameData.ROOMS[this.data.room -1].buttons[4].x,GameData.ROOMS[this.data.room-1].buttons[4].y, 'room-1-btn-collision', () => this.openChallengeGame(this.data.room, 4));
        this.add.existing(this.challengeFour)  
 
        this.createCustomTextButton(this.cameras.main.centerX , this.cameras.main.centerY + 800, () => this.nextRoom()); 
