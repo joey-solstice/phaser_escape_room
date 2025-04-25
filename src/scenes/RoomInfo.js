@@ -15,7 +15,7 @@ export class RoomInfo extends Phaser.Scene {
  
 
     init(data) {
-        console.log(data)
+        console.log('Info: ', data)
          this.data = data;
          this.countSecs = 6;  
          this.data.room = this.data.room ? this.data.room : 1;
@@ -34,8 +34,8 @@ export class RoomInfo extends Phaser.Scene {
         this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'info-bg-general' ).setOrigin(.5); 
         this.pageBg.setInteractive() 
 
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, GameData.ROOMS[0].name, this.styleTitle).setOrigin(0.5).setDepth(999)
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY+100, GameData.ROOMS[0].description, this.styleBody).setOrigin(0.5).setDepth(999)
+        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 200, GameData.ROOMS[this.data.room-1].name, this.styleTitle).setOrigin(0.5).setDepth(999)
+        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY+100, GameData.ROOMS[this.data.room-1].description, this.styleBody).setOrigin(0.5).setDepth(999)
 
         
 

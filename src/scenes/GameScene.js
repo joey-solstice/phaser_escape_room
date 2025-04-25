@@ -72,6 +72,7 @@ export class GameScene extends Phaser.Scene {
    displayAssets() { 
        const roomNumber = 'bg-room-' + this.data.room;
      
+      
         
        this.pageBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, roomNumber).setOrigin(.5); 
        this.pageBg.setInteractive() 
@@ -95,14 +96,16 @@ export class GameScene extends Phaser.Scene {
 
        this.createCustomTextButton(this.cameras.main.centerX , this.cameras.main.centerY + 800, () => this.nextRoom()); 
        this.createLabel('Next Room', this.cameras.main.centerX , this.cameras.main.centerY  + 800)
-   }
+ 
+       this.createLabel('Room: ' + this.data.room  , this.cameras.main.centerX , this.cameras.main.centerY  - 900, '90px', 'white')
+    }
  
 
-   createLabel(text, x, y)
-   {
+   createLabel(text, x, y, size = '42px', color='red')
+   { 
        this.add.text(x, y, text, {
-           fontSize: '42px',
-           color: 'red', // or '#ff0000' 
+           fontSize: size,
+           color: color, // or '#ff0000' 
             fontStyle: 'bold'
        }).setOrigin(.5);
    }
@@ -133,15 +136,8 @@ export class GameScene extends Phaser.Scene {
                 message:{title: 'Next Room is Locked.', body:  'Complete all challenges to unlock next Room.'}
             }  
             this.showScene(CST.SCENES.INFORMATION, message ) 
-        }else{
-
-            const message = {
-                room: this.data.room,
-                success: true, // just to hide the retry button
-                gameOver: false,
-                message:{title: 'Under construction', body:  'Room 2 not available yet.'}
-            }  
-            this.showScene(CST.SCENES.INFORMATION, message ) 
+        }else{ 
+            this.scene.restart( {room: 2, challenge: 1} )
         }
    }
 

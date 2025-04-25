@@ -15,8 +15,7 @@ export class InformationScene extends Phaser.Scene {
  
 
     init(data) { 
-        this.data = data; 
-        console.log('Info',data);
+        this.data = data;  
         const fill = this.data.success ? '#008000' : '#FF474C'; 
 
         this.styleTitle =    { fontFamily: 'Montserrat', fontSize: 54, fill: '#ffffff', align: 'center',fontStyle: 'bold', wordWrap: {  width: 900,  useAdvancedWrap: true }, }    
